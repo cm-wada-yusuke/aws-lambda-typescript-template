@@ -1,3 +1,8 @@
 *.js
 *.d.ts
 node_modules
+
+
+dist/
+templates/*_lambda_common_parameters.yaml
+.idea/

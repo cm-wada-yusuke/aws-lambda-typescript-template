@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  HelloWorld:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Env}-hello-world
+      Role: !GetAtt HelloLambdaRole.Arn
+      KmsKeyArn: !GetAtt HelloLambdaKmsKey.Arn
+      Handler: hello-world/index.handler
+      Runtime: nodejs8.10
+      CodeUri: dist/
+      Timeout: 5
+      Environment:
+        Variables:
+          ENV: !Ref Env
+          NOTE_DEVICE_TABLE_NAME: !Ref NoteDeviceTableName
+
+  HelloLambdaKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Hello application KMS key.
+      KeyPolicy:
+        Id: key-consolepolicy-3
+        Version: '2012-10-17'
+        Statement:
+        - Sid: Enable IAM User Permissions
+          Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+          Action: kms:*
+          Resource: "*"
+        - Sid: Allow use of the key
+          Effect: Allow
+          Principal:
+            AWS:
+            - !GetAtt HelloLambdaRole.Arn
+          Action:
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:ReEncrypt*
+          - kms:GenerateDataKey*
+          - kms:DescribeKey
+          Resource: "*"
+        - Sid: Allow attachment of persistent resources
+          Effect: Allow
+          Principal:
+            AWS:
+            - !GetAtt HelloLambdaRole.Arn
+          Action:
+          - kms:CreateGrant
+          - kms:ListGrants
+          - kms:RevokeGrant
+          Resource: "*"
+          Condition:
+            Bool:
+              kms:GrantIsForAWSResource: true
+  HeroLambdaKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${Env}/hello/lambda'
+      TargetKeyId: !Ref HelloLambdaKmsKey
+  HelloLambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${Env}-hello-lambda-role
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess'
+      - 'arn:aws:iam::aws:policy/AmazonKinesisFullAccess'
+      - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+      Policies:
+      - PolicyName: KmsDecryptPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action:
+            - kms:Encrypt
+            - kms:Decrypt
+            Resource:
+            - !Sub 'arn:aws:kms:*:${AWS::AccountId}:key/*'
+      - PolicyName: PinpointFullAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action:
+            - mobiletargeting:*
+            - mobileanalytics:*
+            Resource: "*"
+      - PolicyName: PermissionToPassAnyRole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/*
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        -
+          Effect: 'Allow'
+          Principal:
+            Service:
+            - 'lambda.amazonaws.com'
+          Action:
+          - 'sts:AssumeRole'
