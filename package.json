@@ -1,0 +1,24 @@
+{
+    "name": "aws-lambda-typescript-template",
+    "version": "0.1.0",
+    "main": "bin/index.js",
+    "types": "bin/index.d.ts",
+    "bin": {
+        "aws-lambda-typescript-template": "bin/aws-lambda-typescript-template.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "cdk": "cdk"
+    },
+    "devDependencies": {
+        "@types/node": "^8.9.4",
+        "typescript": "^3.1.2",
+        "aws-cdk": "^0.16.0"
+    },
+    "dependencies": {
+        "@aws-cdk/aws-sns": "^0.16.0",
+        "@aws-cdk/aws-sqs": "^0.16.0",
+        "@aws-cdk/cdk": "^0.16.0"
+    }
+}
