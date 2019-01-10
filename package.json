@@ -18,6 +18,8 @@
         "@types/js-yaml": "^3.11.2",
         "@types/node": "^8.9.4",
         "@types/source-map-support": "^0.4.1",
+        "@types/luxon": "^1.4.1",
+        "@types/ngeohash": "^0.6.2",
         "aws-cdk": "^0.16.0",
         "aws-sdk": "^2.355.0",
         "commander": "^2.19.0",
@@ -33,6 +35,8 @@
         "@aws-cdk/aws-sns": "^0.16.0",
         "@aws-cdk/aws-sqs": "^0.16.0",
         "@aws-cdk/cdk": "^0.16.0",
-        "source-map-support": "^0.5.9"
+        "source-map-support": "^0.5.9",
+        "luxon": "^1.7.1",
+        "ngeohash": "^0.6.0"
     }
 }

@@ -1,6 +1,6 @@
 # enter your own environment values.
 
-S3_BUCKET := hello-lambda-deploy
+S3_BUCKET := note-lambda-deploy
 
 SSM_LAMBDA_PARAMETERS_DIR := environments
 SSM_LAMBDA_PARAMETERS_FILE := ssm-variables.json
