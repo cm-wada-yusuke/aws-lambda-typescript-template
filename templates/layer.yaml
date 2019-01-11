@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+  NoteNodeModulesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub ${Env}-note-library-layer
+      Description: node_modules
+      ContentUri:
+        Bucket: !Ref DeployBucketName
+        Key: lambda_layer.zip
+      CompatibleRuntimes:
+        - nodejs8.10
+      LicenseInfo: MIT
+      RetentionPolicy: Delete
+Outputs:
+  LayerVersionArn:
+    Value: !Ref NoteNodeModulesLayer
+    Export:
+      Name: !Sub ${Env}-NoteNodeModulesLayer-arn

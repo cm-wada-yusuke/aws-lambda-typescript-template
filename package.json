@@ -10,7 +10,7 @@
         "build": "tsc",
         "watch": "tsc -w",
         "cdk": "cdk",
-        "archive-library": "ts-node scripts/node-modules-archives.ts",
+        "archive-library": "ts-node node-modules-archives.ts",
         "build-lambda": "webpack",
         "gen-params": "ts-node environments/template-parameters-generator.ts"
     },
@@ -32,7 +32,8 @@
         "tslint": "^5.11.0",
         "typescript": "^3.1.6",
         "webpack": "^4.25.1",
-        "webpack-cli": "^3.1.2"
+        "webpack-cli": "^3.1.2",
+        "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
         "@aws-cdk/aws-sns": "^0.16.0",

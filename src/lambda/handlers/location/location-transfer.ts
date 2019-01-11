@@ -4,6 +4,7 @@ import { DeviceLocationUseCase } from '../../domains/location/device-location-us
 import { DateUtil } from '../../modules/util/date-util';
 
 exports.transfer = async (event: any) => {
+    console.log(event);
 
     const dispatchPromises = event.Records.map((record: any) => {
         const payloadString = new Buffer(record.kinesis.data, 'base64').toString('utf-8');

@@ -11,6 +11,9 @@ Resources:
       Runtime: nodejs8.10
       CodeUri: dist/
       Timeout: 5
+      Layers:
+        - Fn::ImportValue:
+            !Sub ${Env}-NoteNodeModulesLayer-arn
       Environment:
         Variables:
           ENV: !Ref Env
