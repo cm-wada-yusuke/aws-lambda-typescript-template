@@ -1,25 +1,28 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:
-  HelloWorld:
+  NoteTransferLocationLambda:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Env}-hello-world
-      Role: !GetAtt HelloLambdaRole.Arn
-      KmsKeyArn: !GetAtt HelloLambdaKmsKey.Arn
-      Handler: hello-world/index.handler
+      FunctionName: !Sub ${Env}-note-transfer-location
+      Role: !GetAtt NoteLambdaRole.Arn
+      KmsKeyArn: !GetAtt NoteLambdaKmsKey.Arn
+      Handler: location/index.transfer
       Runtime: nodejs8.10
       CodeUri: dist/
       Timeout: 5
+      Layers:
+        - Fn::ImportValue:
+            !Sub ${Env}-NoteNodeModulesLayer-arn
       Environment:
         Variables:
           ENV: !Ref Env
           NOTE_DEVICE_TABLE_NAME: !Ref NoteDeviceTableName
 
-  HelloLambdaKmsKey:
+  NoteLambdaKmsKey:
     Type: AWS::KMS::Key
     Properties:
-      Description: Hello application KMS key.
+      Description: Note application KMS key.
       KeyPolicy:
         Id: key-consolepolicy-3
         Version: '2012-10-17'
@@ -34,7 +37,7 @@ Resources:
           Effect: Allow
           Principal:
             AWS:
-            - !GetAtt HelloLambdaRole.Arn
+            - !GetAtt NoteLambdaRole.Arn
           Action:
           - kms:Encrypt
           - kms:Decrypt
@@ -46,7 +49,7 @@ Resources:
           Effect: Allow
           Principal:
             AWS:
-            - !GetAtt HelloLambdaRole.Arn
+            - !GetAtt NoteLambdaRole.Arn
           Action:
           - kms:CreateGrant
           - kms:ListGrants
@@ -55,15 +58,15 @@ Resources:
           Condition:
             Bool:
               kms:GrantIsForAWSResource: true
-  HeroLambdaKmsKeyAlias:
+  NoteLambdaKmsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub 'alias/${Env}/hello/lambda'
-      TargetKeyId: !Ref HelloLambdaKmsKey
-  HelloLambdaRole:
+      AliasName: !Sub 'alias/${Env}/note/lambda'
+      TargetKeyId: !Ref NoteLambdaKmsKey
+  NoteLambdaRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: !Sub ${Env}-hello-lambda-role
+      RoleName: !Sub ${Env}-note-lambda-role
       ManagedPolicyArns:
       - 'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess'
       - 'arn:aws:iam::aws:policy/AmazonKinesisFullAccess'

@@ -15,9 +15,12 @@ display:
 
 clean:
 	-rm -rf dist/
+	-rm -rf layer_modules/
+	-rm lambda_layer.zip
 	-rm packaged-*.yaml
 	-rm lambda_*.yaml
 	-rm infra_*.yaml
+	-rm layer.yaml
 	-rm templates/*_lambda_common_parameters.yaml
 
 push-params: guard-env guard-ns $(SSM_LAMBDA_PARAMETERS_DIR)/*-$(SSM_LAMBDA_PARAMETERS_FILE) $(SECRETS)
@@ -30,12 +33,28 @@ push-params: guard-env guard-ns $(SSM_LAMBDA_PARAMETERS_DIR)/*-$(SSM_LAMBDA_PARA
 generate-cfn-parameters: guard-env
 	@npm run gen-params -- -e $${env}
 
-deploy: guard-env $(LAMBDA_DEPLOY_TASK)
+layer: templates/layer.yaml guard-ns guard-env generate-cfn-parameters
+	mkdir -p layer_modules && \
+	cp package.json layer_modules && \
+	npm install --production --prefix layer_modules && \
+	npm run archive-library && \
+	aws s3 cp lambda_layer.zip s3://$${ns}-$${env}-$(S3_BUCKET)/ && \
+	cat templates/layer.yaml templates/$${env}_lambda_common_parameters.yaml > layer.yaml && \
+	aws cloudformation deploy \
+		--template-file layer.yaml \
+		--stack-name $${env}-lambda-layer  \
+		--capabilities  CAPABILITY_NAMED_IAM CAPABILITY_IAM \
+		--no-fail-on-empty-changeset \
+		--parameter-overrides \
+			CommitId=$(GIT_COMMIT) \
+			DeployBucketName=$${ns}-$${env}-$(S3_BUCKET) ;\
+
+lambda: guard-env $(LAMBDA_DEPLOY_TASK)
 	@echo $(TARGETS)
 	@echo $(UPLOAD_TASK)
 	@echo $(LAMBDA_DEPLOY_TASK)
 
-deploy-%: templates/lambda_%.yaml guard-ns guard-env generate-cfn-parameters
+lambda-%: templates/lambda_%.yaml guard-ns guard-env generate-cfn-parameters
 	@ if [ "${*}" = "" ]; then \
 		echo "Target is not set"; \
 		exit 1; \
@@ -53,7 +72,8 @@ deploy-%: templates/lambda_%.yaml guard-ns guard-env generate-cfn-parameters
 			--capabilities  CAPABILITY_NAMED_IAM CAPABILITY_IAM \
 			--no-fail-on-empty-changeset \
 			--parameter-overrides \
-				CommitId=$(GIT_COMMIT) ; \
+				CommitId=$(GIT_COMMIT) \
+				DeployBucketName=$${ns}-$${env}-$(S3_BUCKET) ;\
 	fi
 
 infra-%: templates/infra_%.yaml guard-ns guard-env generate-cfn-parameters
@@ -78,7 +98,5 @@ guard-%:
 	fi
 
 .PHONY: \
-	install \
-	test-unit \
 	clean \
 	format

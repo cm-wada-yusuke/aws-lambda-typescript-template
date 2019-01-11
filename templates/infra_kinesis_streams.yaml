@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+
+  NoteDeviceLocationStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub ${Env}-note-device-location-stream
+      RetentionPeriodHours: 24
+      ShardCount: 1
+  NoteLambdaDeviceLocationEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 100
+      Enabled: true
+      EventSourceArn: !GetAtt NoteDeviceLocationStream.Arn
+      FunctionName: !Sub ${Env}-note-transfer-location
+      StartingPosition: LATEST

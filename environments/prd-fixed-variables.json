@@ -2,5 +2,9 @@
   {
     "Name": "CommitId",
     "Value": "000000000"
+  },
+  {
+    "Name": "DeployBucketName",
+    "Value": "deploy"
   }
 ]
