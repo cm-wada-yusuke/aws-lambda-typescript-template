@@ -33,12 +33,12 @@ push-params: guard-env guard-ns $(SSM_LAMBDA_PARAMETERS_DIR)/*-$(SSM_LAMBDA_PARA
 generate-cfn-parameters: guard-env
 	@npm run gen-params -- -e $${env}
 
-layer: templates/layer.yaml guard-ns guard-env generate-cfn-parameters
+layer: templates/layer.yaml guard-ns guard-env guard-layer generate-cfn-parameters
 	mkdir -p layer_modules && \
 	cp package.json layer_modules && \
 	npm install --production --prefix layer_modules && \
 	npm run archive-library && \
-	aws s3 cp lambda_layer.zip s3://$${ns}-$${env}-$(S3_BUCKET)/ && \
+	aws s3 cp lambda_layer.zip s3://$${ns}-$${env}-$(S3_BUCKET)/lambda_layer_$${layer}.zip && \
 	cat templates/layer.yaml templates/$${env}_lambda_common_parameters.yaml > layer.yaml && \
 	aws cloudformation deploy \
 		--template-file layer.yaml \
@@ -47,6 +47,7 @@ layer: templates/layer.yaml guard-ns guard-env generate-cfn-parameters
 		--no-fail-on-empty-changeset \
 		--parameter-overrides \
 			CommitId=$(GIT_COMMIT) \
+			LayerVersion=$${layer} \
 			DeployBucketName=$${ns}-$${env}-$(S3_BUCKET) ;\
 
 lambda: guard-env $(LAMBDA_DEPLOY_TASK)
@@ -54,7 +55,7 @@ lambda: guard-env $(LAMBDA_DEPLOY_TASK)
 	@echo $(UPLOAD_TASK)
 	@echo $(LAMBDA_DEPLOY_TASK)
 
-lambda-%: templates/lambda_%.yaml guard-ns guard-env generate-cfn-parameters
+lambda-%: templates/lambda_%.yaml guard-ns guard-env guard-layer generate-cfn-parameters
 	@ if [ "${*}" = "" ]; then \
 		echo "Target is not set"; \
 		exit 1; \
@@ -73,6 +74,7 @@ lambda-%: templates/lambda_%.yaml guard-ns guard-env generate-cfn-parameters
 			--no-fail-on-empty-changeset \
 			--parameter-overrides \
 				CommitId=$(GIT_COMMIT) \
+				LayerVersion=$${layer} \
 				DeployBucketName=$${ns}-$${env}-$(S3_BUCKET) ;\
 	fi
 

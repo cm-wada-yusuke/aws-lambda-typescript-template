@@ -4,6 +4,10 @@
     "Value": "000000000"
   },
   {
+    "Name": "LayerVersion",
+    "Value": "0"
+  },
+  {
     "Name": "DeployBucketName",
     "Value": "deploy"
   }
