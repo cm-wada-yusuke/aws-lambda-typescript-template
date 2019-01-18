@@ -32,8 +32,8 @@ make push-params env=itg ns=cm  #update parameter store.
 * ng: Application namespace. Using S3 bucket prefix.  
 
 ```bash
-make layer env=itg ns=cm
-make deploy-note env=itg ns=cm  #deploy lambda function.
+make layer env=itg ns=cm layer=0
+make deploy-note env=itg ns=cm layer=0 #deploy lambda function.
 make infra-dynamodb_tables env=itg ns=cm  #deploy DynamoDB table.
 ```
 

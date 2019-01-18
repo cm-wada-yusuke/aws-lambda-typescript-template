@@ -8,13 +8,8 @@ Resources:
       Description: node_modules
       ContentUri:
         Bucket: !Ref DeployBucketName
-        Key: lambda_layer.zip
+        Key: !Sub lambda_layer_${LayerVersion}.zip
       CompatibleRuntimes:
         - nodejs8.10
       LicenseInfo: MIT
-      RetentionPolicy: Delete
-Outputs:
-  LayerVersionArn:
-    Value: !Ref NoteNodeModulesLayer
-    Export:
-      Name: !Sub ${Env}-NoteNodeModulesLayer-arn
+      RetentionPolicy: Retain

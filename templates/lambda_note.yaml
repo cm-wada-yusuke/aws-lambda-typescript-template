@@ -12,8 +12,7 @@ Resources:
       CodeUri: dist/
       Timeout: 5
       Layers:
-        - Fn::ImportValue:
-            !Sub ${Env}-NoteNodeModulesLayer-arn
+        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:${Env}-note-library-layer:${LayerVersion}
       Environment:
         Variables:
           ENV: !Ref Env
